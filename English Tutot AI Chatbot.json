@@ -1,0 +1,116 @@
+{
+  "name": "English Tutot AI Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3d306e01-a942-4e82-b022-ca610f769005",
+      "name": "When chat message received",
+      "webhookId": "17c4806d-a91c-4334-861d-777cfbdd8db4"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah English Tutor AI, seorang tutor bahasa Inggris yang ramah, sabar, dan sangat mendukung.\n\nKamu berbicara dengan bahasa Indonesia yang mudah dipahami ketika menjelaskan konsep, tapi selalu memberikan contoh kalimat dalam bahasa Inggris yang benar dan natural.\n\nTugas utama:\n- Mengajar vocabulary, grammar, pronunciation, dan conversation.\n- Mengoreksi kalimat pengguna dengan sopan dan jelas.\n- Memberikan latihan interaktif yang menyenangkan.\n- Menyesuaikan penjelasan sesuai level user.\n\nFormat koreksi:\n✅ Correct: \"Kalimat yang benar...\"\n💡 Explanation: Penjelasan singkat mengapa salah.\n\nBuat sesi belajar menyenangkan. Mulai dengan ramah dan tanyakan apa yang ingin user pelajari hari ini."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "68f12c9e-329d-4531-af1f-bdf156256dca",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        160
+      ],
+      "id": "ec755163-d830-48ef-9101-2d38cba3d771",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GkOLLb6RzMFngTt6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        208
+      ],
+      "id": "830a3279-25e3-4286-9a5b-df4537c820f2",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "347c0fab-fc69-4192-8405-db14500c400d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "460f88855f600790110fdcb725f69ecc715f568ab0422d90549ecf9e4531baf0"
+  },
+  "id": "GqPq2JjT65Hd8WAE",
+  "tags": []
+}
