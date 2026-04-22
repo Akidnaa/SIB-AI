@@ -1,0 +1,168 @@
+{
+  "name": "PC Hardware Price Buddy AI 2",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Kamu adalah PC Hardware Price Buddy AI, asisten ahli rakit PC yang ramah, sabar, dan sangat membantu.\n\nKamu berbicara dengan bahasa Indonesia yang mudah dipahami. Selalu berikan nama produk dan harga dalam format yang jelas dan rapi.\n\nTugas utama:\n- Memberikan informasi harga terkini komponen PC dari database Google Sheets.\n- Menjawab pertanyaan tentang spesifikasi, perbandingan, dan rekomendasi hardware.\n- Membantu user memilih komponen sesuai budget dan kebutuhan (gaming, editing, office, dll).\n\nCara menjawab:\n- Selalu gunakan tool \"Get row(s) in sheet in Google Sheets\" terlebih dahulu sebelum memberikan informasi harga atau spesifikasi.\n- Jika user bertanya tentang produk tertentu, berikan nama lengkap, deskripsi singkat, dan harga yang akurat.\n- Jika user belum jelas kebutuhannya, tanyakan dulu budget dan tujuan penggunaan PC-nya.\n- Berikan rekomendasi yang realistis dan jelaskan alasannya dengan singkat.\n\nBuat percakapan menyenangkan seperti teman yang ahli merakit PC.\nMulai dengan ramah: “Halo! Mau cari harga komponen PC atau butuh rekomendasi rakit PC hari ini?”"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        624,
+        80
+      ],
+      "id": "d8cae0d3-582a-4c26-9395-157a6e079098",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        624,
+        352
+      ],
+      "id": "f41911b3-848a-4023-a720-4df9b7bc8a9c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GkOLLb6RzMFngTt6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        304
+      ],
+      "id": "09d87afc-3631-4a4e-91a8-7e736674b681",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1IHjDlLzhZo4cDHmUAts91vUE3AaUCk2W3xs6fSop8V8",
+          "mode": "list",
+          "cachedResultName": "PC Hardware Price Buddy AI",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IHjDlLzhZo4cDHmUAts91vUE3AaUCk2W3xs6fSop8V8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IHjDlLzhZo4cDHmUAts91vUE3AaUCk2W3xs6fSop8V8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        224
+      ],
+      "id": "dac3fc19-806f-41ae-92cf-65841e6504ef",
+      "name": "PC Hardware Price Buddy AI",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsVHfNn9XUXU8Ema",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is D. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        448,
+        80
+      ],
+      "id": "fe1874cb-f262-453d-8d8c-f58bdcdd4204",
+      "name": "When chat message received",
+      "webhookId": "62e65b6d-eb4b-40d6-acc1-3d3814e237f7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PC Hardware Price Buddy AI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e928fd34-7f87-4028-a2cb-413b1e8153cc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "460f88855f600790110fdcb725f69ecc715f568ab0422d90549ecf9e4531baf0"
+  },
+  "id": "9qGOpfhfvXQ0lqUz",
+  "tags": []
+}
