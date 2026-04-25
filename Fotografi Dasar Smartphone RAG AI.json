@@ -1,0 +1,305 @@
+{
+  "name": "Fotografi Dasar Smartphone RAG AI",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "38f87dd0-2d67-472a-8c2c-cfe011835679",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1GreysxBFMwSUxz7LV4q9BtcQgUPZThZ4",
+          "mode": "list",
+          "cachedResultName": "PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1GreysxBFMwSUxz7LV4q9BtcQgUPZThZ4/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d8eb8428-6561-4d76-a875-16c172ec5004",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "y7iVaM8mBfxgmDlq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "b2697da5-753f-45aa-8111-9800f19b8ae1",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "IALBxpynvaSsHSjT",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        192
+      ],
+      "id": "2a00955c-e14f-4a40-bddd-9591c8c637e1",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        624,
+        304
+      ],
+      "id": "152f94f1-6a8f-494c-9a37-ace2223e4a60",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HD2Wx5N8u9geAxD0",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is D. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        432
+      ],
+      "id": "df9294fc-24b3-4058-a89f-9e4c9623ac98",
+      "name": "When chat message received",
+      "webhookId": "62e65b6d-eb4b-40d6-acc1-3d3814e237f7"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah asisten AI yang membantu mahasiswa menyusun tugas akhir (TA) / skripsi / penulisan ilmiah dengan topik **\"PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA\"**.\n\nTugas utamamu adalah menjawab pertanyaan pengguna seputar isi dokumen tersebut dengan akurat dan sesuai gaya penulisan ilmiah.\n\n**Aturan wajib:**\n1. Kamu HARUS selalu menggunakan tool **Supabase Vector Store** untuk mencari informasi sebelum menjawab.\n2. Jawabanmu harus didasarkan 100% pada informasi yang diambil dari Supabase Vector Store (dokumen PDF \"PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA\").\n3. Jangan pernah mengarang, menambahkan, atau menebak informasi yang tidak ada di dokumen.\n4. Jika tool Supabase Vector Store tidak mengembalikan informasi yang relevan atau tidak menemukan jawaban, jawablah dengan kalimat berikut persis:\n\n   “Maaf, saya belum dapat menjawab karena saya tidak temukan informasi tersebut dalam data yang tersedia.”\n\n5. Gunakan bahasa Indonesia yang formal, akademis, dan jelas. Sesuaikan jawaban dengan konteks penulisan ilmiah (bisa untuk bagian pendahuluan, kajian literatur, metodologi, pembahasan, dll).\n\n6. Jika diminta, kamu boleh membantu menyusun kalimat, menyempurnakan paragraf, atau menyarankan struktur penulisan berdasarkan isi dokumen.\n\nMulailah dengan memanggil tool Supabase Vector Store terlebih dahulu setiap kali ada pertanyaan."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        432
+      ],
+      "id": "ac87677d-9f20-420b-a7e1-c9b4d87f5974",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        656
+      ],
+      "id": "6cf48f5d-623f-4aeb-9071-7bd24977bf65",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HD2Wx5N8u9geAxD0",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Tool ini digunakan untuk mencari dan mengambil informasi relevan dari dokumen PDF \"PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA\". \nDokumen ini berisi panduan lengkap fotografi dasar menggunakan smartphone untuk pemula, mencakup abstrak, pendahuluan, kajian literatur, metodologi penelitian, teknik komposisi, pencahayaan, pengaturan kamera, hasil pengujian, analisis, kesimpulan, dan daftar referensi.\nGunakan tool ini setiap kali Anda membutuhkan data akurat dari dokumen tersebut.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        544
+      ],
+      "id": "ead5a81f-2326-4c81-a7c3-daf601072861",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "IALBxpynvaSsHSjT",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        672
+      ],
+      "id": "03fb7dcb-e994-4ecf-8849-c0ca5ca5cd12",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "T0jW0F87d3BusQNa",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ba3b5821-b268-429a-ab88-e2be3019d66e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d9307b9d51dec5f791587fa7c555cfe22e8d4f254607b1c4a159ac4d7d3fe72e"
+  },
+  "id": "XKeIVaImGfZ0ZJbM",
+  "tags": []
+}
