@@ -1,0 +1,424 @@
+{
+  "name": "Fotografi Dasar Smartphone RAG AI V2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1HNqPoMIIP2iEGFHO4o-xvmptDYBAPDNu",
+          "mode": "list",
+          "cachedResultName": "RAG02",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1HNqPoMIIP2iEGFHO4o-xvmptDYBAPDNu"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "884d4fcf-6d31-40a2-bb20-f346bbee793c",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "y7iVaM8mBfxgmDlq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "de70563a-95b4-44a4-83fc-f85dae7052c7",
+              "name": "={{ $json.id }}",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "21f18270-0176-44bc-9ae1-e135090ca283",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "=1BL1JKDSaVy-glLyvAlFOm2hWCy2bQdQ-_PiGZvJK_7M",
+          "mode": "id"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "7befc5b0-328a-41cd-b93a-449440c51e42",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "y7iVaM8mBfxgmDlq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "f911b291-4974-4bf8-a048-51e0eaa5a43c",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        0
+      ],
+      "id": "a4256a68-0cac-48e6-906a-9693847d1f41",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "IALBxpynvaSsHSjT",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        240
+      ],
+      "id": "ec6fad7f-4e91-424d-ae14-fec460d06dee",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "HD2Wx5N8u9geAxD0",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file_id",
+                "value": "={{ $('Edit Fields').item.json['1BL1JKDSaVy-glLyvAlFOm2hWCy2bQdQ-_PiGZvJK_7M'] }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1056,
+        112
+      ],
+      "id": "62e189e9-1630-4889-95e7-6cf2da195126",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        208
+      ],
+      "id": "5786a055-8772-4d35-8503-909369a356bf",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Kamu adalah asisten AI yang membantu mahasiswa menyusun tugas akhir (TA) atau skripsi dengan topik **\"PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA\"**.\n\nGunakan tool **Supabase Vector Store** untuk mencari informasi dari dokumen tersebut sebelum menjawab setiap pertanyaan.\n\nJawabanmu harus akurat, berdasarkan data yang tersedia, dan ditulis dengan bahasa Indonesia yang formal serta sesuai gaya penulisan ilmiah.\n\nJika informasi yang diminta tidak ditemukan, jawablah dengan:  \n“Maaf, saya belum dapat menjawab karena saya tidak menemukan informasi tersebut dalam data yang tersedia.”"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        496
+      ],
+      "id": "65d2eb17-8405-4088-8012-1eae33a2f979",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Tool ini digunakan untuk mencari dan mengambil informasi relevan dari dokumen \"PANDUAN FOTOGRAFI DASAR MENGGUNAKAN SMARTPHONE UNTUK PEMULA\". \n\nPanggil tool ini untuk menjawab pertanyaan mahasiswa seputar penulisan tugas akhir / skripsi mengenai panduan fotografi dasar menggunakan smartphone.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        608
+      ],
+      "id": "70fbe4e4-ff1f-44d5-bccf-fe6da6b592ad",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "IALBxpynvaSsHSjT",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        736
+      ],
+      "id": "74d3a449-859a-4488-834f-ef3355ca52e0",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "T0jW0F87d3BusQNa",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        208,
+        704
+      ],
+      "id": "19401b9b-fade-4849-b67b-4970b0b1738c",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "X76hB8uLXEihuOOq",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        48,
+        496
+      ],
+      "id": "7a6de25f-20c7-4a47-b530-27356426aab7",
+      "name": "When chat message received",
+      "webhookId": "5c7efad2-7a57-4a91-8cb7-5750021c7643"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a1dfc748-2ce0-4883-9bba-6b407e6c8385",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d9307b9d51dec5f791587fa7c555cfe22e8d4f254607b1c4a159ac4d7d3fe72e"
+  },
+  "id": "w419Je7fcrh2WHys",
+  "tags": []
+}
