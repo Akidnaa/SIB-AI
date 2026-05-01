@@ -1,0 +1,318 @@
+{
+  "name": "AI Video Generator - Image to VIdeo",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"grok-imagine/image-to-video\",\n  \"input\": {\n    \"image_urls\": [\n      \"{{ $json.image_url }}\"\n    ],\n    \"prompt\": \"{{ $json.prompt }}\",\n    \"mode\": \"normal\",\n    \"duration\": \"6\",\n    \"resolution\": \"480p\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        192
+      ],
+      "id": "b2d94e49-3bf1-49f2-8634-8e38785fc8d3",
+      "name": "Mengirim video Generation request ke KIE.API"
+    },
+    {
+      "parameters": {
+        "name": "Video topik 3",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1cNhMaIpnKf7D54q9jtF2-FsvCRz8ZCav",
+          "mode": "list",
+          "cachedResultName": "VGAI 1",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1cNhMaIpnKf7D54q9jtF2-FsvCRz8ZCav"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        176
+      ],
+      "id": "37807c4a-791a-494c-8b28-3eac5cd5ff2b",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "y7iVaM8mBfxgmDlq",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Generate Video Konten Otomatis",
+        "formDescription": "isi detail Video yang akan di generate",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "prompt"
+            },
+            {
+              "fieldLabel": "image_url"
+            },
+            {
+              "fieldLabel": "task_type"
+            },
+            {
+              "fieldLabel": "api_key"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "2b321a20-b554-4753-a7e2-0398f02468b7",
+      "name": "On Form Submission",
+      "webhookId": "1ee949ff-65de-4512-b45f-6a82ee451b6b"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = JSON.parse($json.data.resultJson);\n\nreturn [{\n  videoUrl: result.resultUrls?.[0] || null\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        176
+      ],
+      "id": "1b44eb61-ac34-441d-8294-29188b067c5a",
+      "name": "Format Result"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          },
+          "proxy": ""
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1232,
+        176
+      ],
+      "id": "dd5910ac-6f4a-4cf4-bd70-40d0ffa41f10",
+      "name": "Download Video"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$node[\"On Form Submission\"].json[\"api_key\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        592,
+        192
+      ],
+      "id": "df94597c-10d5-4a2c-a916-f1f1c9219666",
+      "name": "Mendapatkan Status Generate"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ff1acce8-5c38-4cdc-9286-d009212a13f5",
+              "leftValue": "success",
+              "rightValue": "={{ $json.data.state }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        192
+      ],
+      "id": "5256784d-317e-431d-9ba9-9a0c0e11006e",
+      "name": "check generate"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        192
+      ],
+      "id": "5f25b30f-6e43-4324-9b8e-744b2c3c14b5",
+      "name": "Menunggu Proses Generate Video",
+      "webhookId": "4795c742-d449-44f3-a296-bef5e76a924c"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Mengirim video Generation request ke KIE.API": {
+      "main": [
+        [
+          {
+            "node": "Menunggu Proses Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On Form Submission": {
+      "main": [
+        [
+          {
+            "node": "Mengirim video Generation request ke KIE.API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Result": {
+      "main": [
+        [
+          {
+            "node": "Download Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Video": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mendapatkan Status Generate": {
+      "main": [
+        [
+          {
+            "node": "check generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check generate": {
+      "main": [
+        [
+          {
+            "node": "Format Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Menunggu Proses Generate Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menunggu Proses Generate Video": {
+      "main": [
+        [
+          {
+            "node": "Mendapatkan Status Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f272d4f5-8494-4662-b95b-cbac23973449",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d9307b9d51dec5f791587fa7c555cfe22e8d4f254607b1c4a159ac4d7d3fe72e"
+  },
+  "id": "CiGHndKflk7jV7YL",
+  "tags": []
+}
