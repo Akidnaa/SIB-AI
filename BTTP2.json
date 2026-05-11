@@ -1,0 +1,202 @@
+{
+  "name": "BTTP2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "611401c3-e766-4400-bba1-cc8709fc751e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4",
+          "mode": "list",
+          "cachedResultName": "Copy of Best Time to Post Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Data Posting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "2ed737b0-36c3-4372-93fd-6dcb88bbfc45",
+      "name": "Read Posting Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6c2ACWiHda9vycx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil semua data\nconst items = $input.all();\n\nif (!items || items.length === 0) {\n  throw new Error('Tidak ada data dari Google Sheets!');\n}\n\n// Agregasi per jam\nconst hourlyData = {};\n\nitems.forEach(item => {\n  const row = item.json;\n  \n  const hourRaw = row['Jam Posting'] || row['jam posting'] || row['Jam'] || row['jam'];\n  const likes = parseInt(row['Likes'] || row['likes'] || 0);\n  const comments = parseInt(row['Comments'] || row['comments'] || 0);\n  const shares = parseInt(row['Shares'] || row['shares'] || 0);\n\n  if (hourRaw === undefined || hourRaw === '') return;\n\n  const hour = parseInt(hourRaw);\n  if (isNaN(hour) || hour < 0 || hour > 23) return;\n\n  const engagement = likes + (comments * 2) + (shares * 3);\n\n  if (!hourlyData[hour]) {\n    hourlyData[hour] = { totalEngagement: 0, count: 0 };\n  }\n\n  hourlyData[hour].totalEngagement += engagement;\n  hourlyData[hour].count += 1;\n});\n\n// Buat hasil akhir\nconst results = Object.keys(hourlyData).map(hour => {\n  const avgEngagement = Math.round(hourlyData[hour].totalEngagement / hourlyData[hour].count);\n  return {\n    jam: `${String(hour).padStart(2, '0')}:00`,\n    avgEngagement: avgEngagement,\n    jumlahPost: hourlyData[hour].count\n  };\n});\n\n// Urutkan & ambil 5 jam terbaik\nresults.sort((a, b) => b.avgEngagement - a.avgEngagement);\n\nconst top5 = results.slice(0, 5).map((item, index) => ({\n  ranking: index + 1,\n  ...item,\n  rekomendasi: index === 0 ? '⭐ TERBAIK' : \n               index < 3 ? '✅ SANGAT DIREKOMENDASIKAN' : \n               '👍 DIREKOMENDASIKAN'\n}));\n\nreturn top5.map(item => ({ json: item }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "9a59bbfa-707b-4fe1-834a-45732d2285ab",
+      "name": "Best Timing Analysis"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil hasil analisis dari input sebelumnya\nconst items = $input.all();\n\nif (!items || items.length === 0) {\n  return [{ json: { message: '❌ Tidak ada data untuk dikirim' } }];\n}\n\n// Ambil top 5 jam terbaik\nconst top5 = items.slice(0, 5);\nconst totalData = items[0].json.totalDataDianalisis || 'N/A';\nconst tanggalAnalisis = items[0].json.tanggalAnalisis || new Date().toLocaleString('id-ID');\n\n// Format pesan Telegram dengan emoji dan formatting\nlet message = `📊 *HASIL ANALISIS WAKTU POSTING TERBAIK*\\n`;\nmessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n\\n`;\nmessage += `🏆 *TOP 5 JAM TERBAIK:*\\n\\n`;\n\ntop5.forEach((item, index) => {\n  const data = item.json;\n  const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;\n  \n  message += `${medal} *JAM ${data.jam}*\\n`;\n  message += `   📈 Avg Engagement: *${data.avgEngagement}*\\n`;\n  message += `   ❤️ Avg Likes: ${data.avgLikes}\\n`;\n  message += `   💬 Avg Comments: ${data.avgComments}\\n`;\n  message += `   🔄 Avg Shares: ${data.avgShares}\\n`;\n  message += `   📱 Platform: ${data.platformTerbanyak}\\n`;\n  message += `   📊 Total Post: ${data.jumlahPost} post\\n`;\n  message += `   ${data.rekomendasi}\\n\\n`;\n});\n\nmessage += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n`;\nmessage += `💡 *REKOMENDASI:*\\n`;\nmessage += `Posting pada jam *${top5[0].json.jam}* memberikan engagement tertinggi dengan rata-rata *${top5[0].json.avgEngagement}* engagement!\\n\\n`;\n\nmessage += `📅 Analisis: ${tanggalAnalisis}\\n`;\nmessage += `📝 Total data: ${totalData} post\\n\\n`;\n\nmessage += `_Gunakan insight ini untuk optimasi strategi posting Anda!_ 🚀`;\n\nreturn [{ json: { \n  chatId: '',  // Akan diisi dari credential atau parameter\n  message: message,\n  parseMode: 'Markdown'\n} }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "09af7f78-b041-474b-a964-5e11f0e53c1a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4",
+          "mode": "list",
+          "cachedResultName": "Copy of Best Time to Post Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 723653925,
+          "mode": "list",
+          "cachedResultName": "Hasil Analisis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIP-HHJ6EFBH_upl_UlrFavpiDKbomBRlVtGSn1bNv4/edit#gid=723653925"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        0
+      ],
+      "id": "958459db-a729-4ddd-9af6-b883055e912a",
+      "name": "Delete Previous Result",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6c2ACWiHda9vycx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "2003455919z",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1136,
+        0
+      ],
+      "id": "448dbc1b-f6b8-4284-ab86-957680ca03dd",
+      "name": "Send a text message",
+      "webhookId": "68629cdc-2d12-4431-8beb-b1b8c8c78073",
+      "credentials": {
+        "telegramApi": {
+          "id": "W8UEeNoggolzcuvt",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read Posting Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Posting Data": {
+      "main": [
+        [
+          {
+            "node": "Best Timing Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Best Timing Analysis": {
+      "main": [
+        [
+          {
+            "node": "Delete Previous Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Previous Result": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "da0298bf-9a0f-464e-974f-78831451a160",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06d8d7a121f7558ff569bd50325678f0048e705845c11310fd3aec34cd51a484"
+  },
+  "id": "QEBY3hHqK1ymkwCQ",
+  "tags": []
+}
