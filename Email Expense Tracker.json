@@ -1,0 +1,402 @@
+{
+  "name": "Email Expense Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d57dc99-d00a-4d4a-9c43-e0741c5349b8",
+              "name": "Date",
+              "value": "={{ $('New Email Reciever').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "97a0e1df-5036-4fdb-836e-8c641c715e51",
+              "name": "Amount",
+              "value": "={{ $json.textPlain.match(/Total.*?Rp\\s*([\\d\\.]+)/)?.[1]?.replace(/\\./g, '') ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "2aefa8c3-5671-4e52-a9f6-35d0e9ad046a",
+              "name": "Nominal",
+              "value": "Cloud",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -208
+      ],
+      "id": "82424f35-49e8-45a0-9a90-552d172df27e",
+      "name": "IDCloudHost"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        16
+      ],
+      "id": "8f756860-8ac2-41bb-bf84-3f7ca85b6875",
+      "name": "New Email Reciever",
+      "credentials": {
+        "imap": {
+          "id": "g1Lc2pULaMjqBMzb",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.from }}",
+                    "rightValue": "slimerbusta@gmail.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "d659314b-9630-44b0-9bf4-550d57819461"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "IDCloudHost"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d28980e0-a87f-4ee3-950a-36b6923e63e4",
+                    "leftValue": "={{ $json.from }}",
+                    "rightValue": "desertchimpzz@gmail.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Gojek"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e18c5986-9948-4fb5-817e-0db15531e074",
+                    "leftValue": "={{ $json.from }}",
+                    "rightValue": "m.4ndh1k4@gmail.com",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tokopedia"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "893606b3-81a5-4db4-8458-cfdcd0a92774",
+      "name": "Checking Emails"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d57dc99-d00a-4d4a-9c43-e0741c5349b8",
+              "name": "Date",
+              "value": "={{ $('New Email Reciever').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "97a0e1df-5036-4fdb-836e-8c641c715e51",
+              "name": "Amount",
+              "value": "=Tarif.*?([\\d\\.]+)/s)?.[1].replace(/\\./g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "2aefa8c3-5671-4e52-a9f6-35d0e9ad046a",
+              "name": "Nominal",
+              "value": "Gojek",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        16
+      ],
+      "id": "c46ac946-a384-4751-b419-3d820b44122d",
+      "name": "Gojek"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d57dc99-d00a-4d4a-9c43-e0741c5349b8",
+              "name": "Date",
+              "value": "={{ $('New Email Reciever').item.json.date }}",
+              "type": "string"
+            },
+            {
+              "id": "97a0e1df-5036-4fdb-836e-8c641c715e51",
+              "name": "Amount",
+              "value": "={{ $json.textPlain.match(/Harga\\s*Rp([\\d\\.]+)/)?.[1].replace(/\\./g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "2aefa8c3-5671-4e52-a9f6-35d0e9ad046a",
+              "name": "Nominal",
+              "value": "={{ $json.textPlain.match(/Nominal\\s*(.*?)\\s*Waktu/s)?.[1].trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        224
+      ],
+      "id": "67559185-137f-45d4-bd03-db9644bf369c",
+      "name": "Tokopedia"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        960,
+        0
+      ],
+      "id": "ed2e9295-ff1b-4a12-ba90-17c6c15f7d95",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1o-kswf2mGmAoLbhnV4Xyt8xmDznGoJJGW40_uznoqJQ",
+          "mode": "list",
+          "cachedResultName": "Automatic Email Expense Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o-kswf2mGmAoLbhnV4Xyt8xmDznGoJJGW40_uznoqJQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o-kswf2mGmAoLbhnV4Xyt8xmDznGoJJGW40_uznoqJQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Tanggal": "={{ $json.Date }}",
+            "Jumlah": "={{ $json.Amount }}",
+            "Produk": "={{ $json.Nominal }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Tanggal",
+              "displayName": "Tanggal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Jumlah",
+              "displayName": "Jumlah",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Produk",
+              "displayName": "Produk",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        16
+      ],
+      "id": "62b5c351-1c3c-4732-a093-ee98139481af",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6c2ACWiHda9vycx",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Email Reciever": {
+      "main": [
+        [
+          {
+            "node": "Checking Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Checking Emails": {
+      "main": [
+        [
+          {
+            "node": "IDCloudHost",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gojek",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tokopedia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IDCloudHost": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gojek": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Tokopedia": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7e5145cf-f849-45e9-ae8f-2f728ef1d52b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06d8d7a121f7558ff569bd50325678f0048e705845c11310fd3aec34cd51a484"
+  },
+  "id": "iHtzI1M8A7Dq1zLM",
+  "tags": []
+}
