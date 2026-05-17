@@ -1,0 +1,442 @@
+{
+  "name": "Daily Sentiment Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a2372602-0b05-4449-8efb-628f863ffc01",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analisis sentimen dari teks berikut:\n\"{{ $json.Tweet_Text }}\"\n\nTugas Anda:\n1. Tentukan label sentimen: \"Positive\", \"Negative\", atau \"Neutral\".\n2. Berikan skor numerik (Score) antara 0 sampai 1 yang menunjukkan kekuatan sentimen tersebut (0 = sangat negatif, 1 = sangat positif).\n\nAturan Output (Wajib):\n- HANYA berikan label dan skor dalam format: Label | Skor\n- Contoh: Positive | 0.85\n- JANGAN berikan penjelasan, pembukaan, atau simbol markdown apapun.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "1c816554-77d1-4824-88fb-61a084a37396",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        416,
+        208
+      ],
+      "id": "cdeafb8b-19c6-4946-b0f2-ceeb62c31f22",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "px3JbxRJX0BOK35s",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs",
+          "mode": "list",
+          "cachedResultName": "Sentiment Sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}",
+            "Tweet_ID": "={{ $('Fetch Data').item.json.Tweet_ID}}",
+            "Tweet_Text": "={{ $('Fetch Data').item.json.Tweet_Text }}",
+            "Ai_Analysis_Result": "={{ $json.text.split('|')[0].trim() }}",
+            "Score": "={{ $json.text.split('|')[1].trim() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tweet_ID",
+              "displayName": "Tweet_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tweet_Text",
+              "displayName": "Tweet_Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ai_Analysis_Result",
+              "displayName": "Ai_Analysis_Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Score",
+              "displayName": "Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        0
+      ],
+      "id": "3ed435bf-be9b-474f-8056-3e7af77de1b4",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6c2ACWiHda9vycx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55abf157-457f-4d3d-9987-31ce4548bdb7",
+              "name": "Timestamp",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "e1662fbb-9137-4a28-a0c7-954fc7c5eb9c",
+              "name": "Tweet_ID",
+              "value": 212754,
+              "type": "number"
+            },
+            {
+              "id": "6b5ab4b2-651f-4145-81d8-a4c04b4af7c4",
+              "name": "Tweet_Text",
+              "value": "Market sentiment towards Bitcoin ($BTC) is very Positive this morning because trading volume has increased sharply.",
+              "type": "string"
+            },
+            {
+              "id": "bc6d1cff-2163-4c26-95cf-c356a12b3017",
+              "name": "Ai_Analysis_Result",
+              "value": "Positve",
+              "type": "string"
+            },
+            {
+              "id": "886e01b8-dcca-46f2-a23c-ad736a0f2adf",
+              "name": "score",
+              "value": 0.85,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3142f2f7-1192-4d0b-9690-c87fe22b22b5",
+      "name": "Fetch Data"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        400
+      ],
+      "id": "330d8f80-34c2-4262-a0e2-5c9846bdf7d0",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil semua baris dari node \"Google Sheets\"\n// **Pastikan nama node Anda adalah \"Google Sheets\"**\nconst items = $items(\"Read Data\");\n\nlet positive = 0;\nlet negative = 0;\nlet neutral = 0;\nlet total = 0;\n\n// Loop melalui setiap baris\nfor (const item of items) {\n  // Ambil nilai dari kolom \"Sentiment\"\n  const sentiment = item.json.Sentiment;\n  \n  if (sentiment === 'Positive') {\n    positive++;\n  } else if (sentiment === 'Negative') {\n    negative++;\n  } else if (sentiment === 'Neutral') {\n    neutral++;\n  }\n}\n\ntotal = items.length;\n\n// Kembalikan hasil perhitungan\nreturn {\n  total_tweets: total,\n  sentimen_positif: positive,\n  sentimen_negatif: negative,\n  sentimen_netral: neutral\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        400
+      ],
+      "id": "d8ad2297-6981-48e7-88db-33f3489d4abf",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        640,
+        592
+      ],
+      "id": "a0f165cd-5c06-4aeb-8a04-9d1bc0e20023",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "px3JbxRJX0BOK35s",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "2003455919z",
+        "text": "={{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        400
+      ],
+      "id": "8e277626-7d52-48f7-bf82-8a045f040276",
+      "name": "Send a text message",
+      "webhookId": "3e72833a-7cb1-4e38-a105-a46cbd5e10f7",
+      "credentials": {
+        "telegramApi": {
+          "id": "W8UEeNoggolzcuvt",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs",
+          "mode": "list",
+          "cachedResultName": "Sentiment Sheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ommjA2u0uM6YUBGVGejlpSCbg6P6Xp8tWGAnkCEjRIs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        400
+      ],
+      "id": "ffe096b1-aeec-41e9-a31a-eb85dc8f02c6",
+      "name": "Read Data",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "e6c2ACWiHda9vycx",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Anda adalah seorang analis sentimen media sosial.\nTuliskan kesimpulan singkat (dalam bahasa Indonesia) untuk laporan Telegram, berdasarkan data berikut:\n\n- Total Tweet Dianalisis: {{ $json.total_tweets }}\n- Sentimen Positif: {{ $json.sentimen_positif }}\n- Sentimen Negatif: {{ $json.sentimen_negatif }}\n- Sentimen Netral: {{ $json.sentimen_netral }}\n\nBerikan ringkasan singkat tentang apa arti angka-angka ini (misalnya, \"Sentimen hari ini cenderung positif,\" \"Ada banyak keraguan di pasar,\" dll.).\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        640,
+        400
+      ],
+      "id": "43184626-9bd0-4533-ae47-c49b51252e84",
+      "name": "Basic LLM Chain"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Data": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Read Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Data": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "cd8835e2-28a0-40a8-8504-93770fac3353",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "06d8d7a121f7558ff569bd50325678f0048e705845c11310fd3aec34cd51a484"
+  },
+  "id": "5N2t5CewqtmiaJTO",
+  "tags": []
+}
