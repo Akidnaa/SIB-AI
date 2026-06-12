@@ -1,0 +1,332 @@
+{
+  "name": "SOP AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "598e41a8-a953-4d0e-914c-5ceb653934f8",
+      "name": "Telegram Trigger",
+      "webhookId": "c0054f14-1d85-4ed8-ad38-5394d452d4ed",
+      "credentials": {
+        "telegramApi": {
+          "id": "oHsjox1qJp2xwRU5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e91b7853-cccb-456e-8cc7-eb5ff48af829",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "What is the reimbursement procedure?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "8a9af857-5191-4c8e-8367-e1c88862bfbf",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Procedure for applying for annual leave",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "142bed7b-eff9-4ede-804a-c97ef285e082",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "What are the overtime rules in the company?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6cf67d87-9b30-43f5-9543-c9da52f57640",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "What are the conditions for a health insurance claim?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "db23cf1f-2bd6-439a-b1f8-d1ac3e1e834f",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "What is the procedure for requesting new work tools?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "b188d7e9-f466-415b-8eda-bc8ed8707ec9",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "1. What is the reimbursement procedure?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "843ccfd9-df86-47a1-8714-cda92e60bf76",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "2. Procedure for applying for annual leave",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "56afc025-d44c-415f-8a18-c0da2ebe8bf6",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "3. What are the overtime rules in the company?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "f821ee18-891a-4093-96c8-dc1094407d25",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "4. What are the conditions for claiming health insurance?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "bb0d978c-a65e-4f2c-a696-57b587ae4fbd",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "5. What is the procedure for requesting new work tools?",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        112,
+        0
+      ],
+      "id": "2f4a4484-2cf9-4e1c-8b3d-43dcfcc71639",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an SOP AI Agent.\n\nSTRICT RULE:\n\nYou MUST use the \"Question Data\" TOOL before answering.\n\nAnswers MUST be taken from the tool's results.\n\nUsing general knowledge is NOT allowed.\n\nIf data is not found, answer: \"Sorry, that information is not available in the SOP.\"\n\nUser question:\n{{ $node[\"Telegram Trigger\"].json.message.text }}\n\nAnswer based on SOP:",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        576,
+        -16
+      ],
+      "id": "8e961911-5790-4328-879c-3d774a9d0ccd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        576,
+        160
+      ],
+      "id": "fdf1af7c-59c0-44d1-8cb9-d9a2c72063e4",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "SewAK5hTxt8ng7QN",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_MVP8MSai_u-u9oI5OrPz6pawdCoB_PAhtSxI79WFZY",
+          "mode": "list",
+          "cachedResultName": "Question data for employees",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_MVP8MSai_u-u9oI5OrPz6pawdCoB_PAhtSxI79WFZY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_MVP8MSai_u-u9oI5OrPz6pawdCoB_PAhtSxI79WFZY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        192
+      ],
+      "id": "c43d4d6b-d16b-4bdc-a3d1-77c5bd4d85c5",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jsN9qnQkBpjoWqzV",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "2003455919",
+        "text": "=The question you submitted is not relevant. Please use the questions below:\nWhat is the reimbursement procedure?\nAnnual leave application procedure? What are the company's overtime regulations?\nWhat are the health insurance claim requirements?\nWhat is the procedure for requesting new work equipment?",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        128
+      ],
+      "id": "ad447369-c972-4f1e-81ec-7c3600d43d31",
+      "name": "False Output",
+      "webhookId": "3e9d8932-3775-49a0-a74a-bb896961ded1",
+      "credentials": {
+        "telegramApi": {
+          "id": "oHsjox1qJp2xwRU5",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        -16
+      ],
+      "id": "5294a804-d535-4642-9ba9-0356119050d2",
+      "name": "True Output",
+      "webhookId": "babb09d0-d30f-4ea9-8ca8-ae6b2e6503e2",
+      "credentials": {
+        "telegramApi": {
+          "id": "oHsjox1qJp2xwRU5",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "False Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "True Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "386c7fff-dd0a-4223-ad63-4c098ad79d3c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6d5ed230d438df5757cfe7250e470eb74c4b4fd06aa6b890600ad7be73789c5"
+  },
+  "nodeGroups": [],
+  "id": "LFrzAApRYWVjgQ8B",
+  "tags": []
+}
